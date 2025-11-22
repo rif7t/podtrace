@@ -16,18 +16,39 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Install ShellCheck
-        run: sudo apt-get update && sudo apt-get install -y shellcheck
+      - name: Install tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            shellcheck \
+            devscripts \
+            bashate \
+            shfmt
+
+      - name: Syntax Check
+        run: |
+          echo "Running bash syntax check..."
+          for file in $(git ls-files '*.sh'); do
+            echo "→ Checking syntax: $file"
+            bash -n "$file"
+          done
 
       - name: Run ShellCheck
         run: |
-          echo "Running ShellCheck on all .sh files:"
-          shellcheck $(git ls-files '*.sh')
+          echo "Running strict ShellCheck..."
+          shellcheck --enable=all -x $(git ls-files '*.sh')
 
-      - name: Install shfmt
-        run: sudo apt-get install -y shfmt || go install mvdan.cc/sh/v3/cmd/shfmt@latest
+      - name: Check for bashisms
+        run: |
+          echo "Checking for bashisms..."
+          checkbashisms $(git ls-files '*.sh')
+
+      - name: Run bashate
+        run: |
+          echo "Running bashate..."
+          bashate $(git ls-files '*.sh')
 
       - name: Check formatting (shfmt)
         run: |
