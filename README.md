@@ -79,7 +79,7 @@ sudo ./scripts/setup-capabilities.sh
 ```
 
 
-
+---
 
 ## Podtrace Prometheus & Grafana Integration
 
